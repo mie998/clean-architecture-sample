@@ -33,7 +33,7 @@ func Serve(addr string) {
 		RepoFactory:   gateway.NewUserRepository,
 		Conn:          conn,
 	}
-	http.HandleFunc("/user/", user.GetUserByID)
+	http.HandleFunc("/user/", user.HandleUserRequest)
 	err = http.ListenAndServe(addr, nil)
 	if err != nil {
 		log.Fatalf("Listen and serve failed. %+v", err)

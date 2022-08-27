@@ -9,6 +9,7 @@ import (
 	"database/sql"
 	"errors"
 	"fmt"
+	"github.com/google/uuid"
 	"log"
 
 	"github.com/arkuchy/clean-architecture-sample-sample/entity"
@@ -34,11 +35,28 @@ func (u *UserRepository) GetUserByID(ctx context.Context, userID string) (*entit
 	err := row.Scan(&user.ID, &user.Name)
 	if err != nil {
 		if err == sql.ErrNoRows {
-			return nil, fmt.Errorf("User Not Found. UserID = %s", userID)
+			return nil, fmt.Errorf("user Not Found. UserID = %s", userID)
 		}
 		log.Println(err)
-		return nil, errors.New("Internal Server Error. adapter/gateway/GetUserByID")
+		return nil, errors.New("internal Server Error. adapter/gateway/GetUserByID")
 	}
+	return &user, nil
+}
+
+func (u *UserRepository) PostUserByName(ctx context.Context, userName string) (*entity.User, error) {
+	conn := u.GetDBConn()
+	userId := uuid.New().String()
+	_, err := conn.ExecContext(ctx, "INSERT INTO `user` (`id`,`name`) VALUES (?, ?)", userId, userName)
+	if err != nil {
+		if err == sql.ErrNoRows {
+			return nil, fmt.Errorf("couldn't create user: %s", userName)
+		}
+		log.Println(err)
+		return nil, errors.New("internal Server Error. adapter/gateway/PostUserByName")
+	}
+	user := entity.User{}
+	user.ID = userId
+	user.Name = userName
 	return &user, nil
 }
 

@@ -11,6 +11,7 @@ controller パッケージは，入力に対するアダプターです．
 
 import (
 	"database/sql"
+	"encoding/json"
 	"net/http"
 	"strings"
 
@@ -35,4 +36,33 @@ func (u *User) GetUserByID(w http.ResponseWriter, r *http.Request) {
 	repository := u.RepoFactory(u.Conn)
 	inputPort := u.InputFactory(outputPort, repository)
 	inputPort.GetUserByID(ctx, userID)
+}
+
+type PostUserByName struct {
+	Name string
+}
+
+func (u *User) PostUserByName(w http.ResponseWriter, r *http.Request) {
+	ctx := r.Context()
+	var req PostUserByName
+	err := json.NewDecoder(r.Body).Decode(&req)
+	if err != nil {
+		w.WriteHeader(http.StatusBadRequest)
+		return
+	}
+	outputPort := u.OutputFactory(w)
+	repository := u.RepoFactory(u.Conn)
+	inputPort := u.InputFactory(outputPort, repository)
+	inputPort.PostUserByName(ctx, req.Name)
+}
+
+func (u *User) HandleUserRequest(w http.ResponseWriter, r *http.Request) {
+	switch r.Method {
+	case "GET":
+		u.GetUserByID(w, r)
+	case "POST":
+		u.PostUserByName(w, r)
+	default:
+		w.WriteHeader(http.StatusMethodNotAllowed)
+	}
 }

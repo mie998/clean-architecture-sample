@@ -12,6 +12,7 @@ import (
 
 type UserInputPort interface {
 	GetUserByID(ctx context.Context, userID string)
+	PostUserByName(ctx context.Context, userName string)
 }
 
 type UserOutputPort interface {
@@ -22,4 +23,5 @@ type UserOutputPort interface {
 // userのCRUDに対するDB用のポート
 type UserRepository interface {
 	GetUserByID(ctx context.Context, userID string) (*entity.User, error)
+	PostUserByName(ctx context.Context, userName string) (*entity.User, error)
 }
